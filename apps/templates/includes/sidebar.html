@@ -13,19 +13,38 @@
         <div class="navbar-content scroll-div">
             <ul class="nav pcoded-inner-navbar">
                 <li class="nav-item pcoded-menu-caption">
-                    <label>Navigation</label>
+                    <label>Current Party</label>
                 </li>
-                <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project" 
-                    class="nav-item {% if 'index' in segment %} active {% endif %}">
+                <li data-username="dashboard" 
+                    class="nav-item">
                     <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
                             class="pcoded-mtext">Dashboard</span></a>
                 </li>
                 <li data-username="Profile Page" 
-                    class="nav-item {% if 'profile' in segment %} active {% endif %}">
-                    <a href="/profile.html" class="nav-link">
-                        <span class="pcoded-micon"><i class="feather icon-user"></i></span>
-                            <span class="pcoded-mtext">Profile Page</span></a>
-                </li>                
+                    class="nav-item">
+                    <a href="/joinParty/" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-user-plus"></i></span>
+                            <span class="pcoded-mtext">Join Party</span></a>
+                </li>
+                <li data-username="Profile Page" 
+                    class="nav-item">
+                    <a href="/newPlaylist/" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-play"></i></span>
+                            <span class="pcoded-mtext">Create new Playlist</span></a>
+                </li>
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Party Management</label>
+                </li>
+                <li data-username="dashboard" 
+                    class="nav-item">
+                    <a href="/newParty/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-plus"></i></span><span
+                            class="pcoded-mtext">Create new Party</span></a>
+                </li>
+                <li data-username="dashboard" 
+                    class="nav-item">
+                    <a href="/processSongs/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-music"></i></span><span
+                            class="pcoded-mtext">Process Songs</span></a>
+                </li>               
                 <li class="nav-item pcoded-menu-caption">
                     <label>UI Element</label>
                 </li>
