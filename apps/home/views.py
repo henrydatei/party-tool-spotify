@@ -100,7 +100,7 @@ def newParty(request: HttpRequest):
     return render(request, 'home/newParty.html')
 
 def processSongs(request: HttpRequest):
-    not_processed_songs = Song.objects.filter(Q(danceability__isnull=True) | Q(energy__isnull=True) | Q(key__isnull=True) | Q(loudness__isnull=True) | Q(mode__isnull=True) | Q(speechiness__isnull=True) | Q(acousticness__isnull=True) | Q(instrumentalness__isnull=True) | Q(liveness__isnull=True) | Q(valence__isnull=True) | Q(tempo__isnull=True) | Q(language__isnull=True)).all()
+    not_processed_songs = Song.objects.filter(processed=False)
     for song in not_processed_songs:
         features = my_sp.audio_features(song.spotify_id)[0]
         song.danceability = features["danceability"]

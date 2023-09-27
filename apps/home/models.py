@@ -26,6 +26,18 @@ class Song(models.Model):
     duration_ms = models.IntegerField()
     popularity = models.IntegerField()
     language = models.TextField(default=None, null=True)
+    processed = models.BooleanField(default=False)
+    
+    def save(self, *args, **kwargs):
+        fields_to_check = [
+            self.danceability, self.energy, self.key, self.loudness, self.mode,
+            self.speechiness, self.acousticness, self.instrumentalness, 
+            self.liveness, self.valence, self.tempo, self.language
+        ]
+
+        self.processed = all(field is not None for field in fields_to_check)
+
+        super(Song, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} - {self.artist}"
