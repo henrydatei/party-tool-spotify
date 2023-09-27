@@ -27,6 +27,7 @@ class Song(models.Model):
     popularity = models.IntegerField()
     language = models.TextField(default=None, null=True)
     processed = models.BooleanField(default=False)
+    cover = models.TextField()
     
     def save(self, *args, **kwargs):
         fields_to_check = [

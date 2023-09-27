@@ -14,6 +14,8 @@ from spotipy.oauth2 import SpotifyOAuth
 # import requests
 # from polyglot.detect import Detector
 import random
+import numpy as np
+from datetime import datetime
 
 from .models import Party, Song, Blacklist, Playlist, User
 
@@ -49,8 +51,26 @@ def convert_dict_filter_to_orm_filter(dict_filter: dict):
     return filter_conditions
 
 def index(request: HttpRequest):
-    party = Party.objects.filter(active=True).first()
-    context = {'party': party}
+    currentParty = Party.objects.filter(active=True).first()
+    
+    allSongsinPlaylists = []
+    for playlist in currentParty.playlists.all():
+        allSongsinPlaylists += playlist.songs.all()
+    
+    context = {
+        'party': currentParty,
+        'danceability': np.mean([song.danceability for song in allSongsinPlaylists]) * 100,
+        'energy': np.mean([song.energy for song in allSongsinPlaylists]) * 100,
+        'loudness': np.mean([song.loudness for song in allSongsinPlaylists]),
+        'speechiness': np.mean([song.speechiness for song in allSongsinPlaylists]) * 100,
+        'acousticness': np.mean([song.acousticness for song in allSongsinPlaylists]) * 100,
+        'instrumentalness': np.mean([song.instrumentalness for song in allSongsinPlaylists]) * 100,
+        'liveness': np.mean([song.liveness for song in allSongsinPlaylists]) * 100,
+        'valence': np.mean([song.valence for song in allSongsinPlaylists]) * 100,
+        'tempo': np.mean([song.tempo for song in allSongsinPlaylists]),
+        'popularity': np.mean([song.popularity for song in allSongsinPlaylists]),
+        'playlists': currentParty.playlists.all(),
+    }
 
     html_template = loader.get_template('home/index.html')
     return HttpResponse(html_template.render(context, request))
@@ -95,6 +115,7 @@ def callback(request: HttpRequest):
             song.spotify_id = item['track']['id']
             song.popularity = item['track']['popularity']
             song.duration_ms = item['track']['duration_ms']
+            song.cover_url = item['track']['album']['images'][0]['url']
             song.save()
             party.songs_from_users.add(song)
         i += 50
@@ -164,7 +185,7 @@ def newPlaylist(request: HttpRequest):
             
         # Create new Playlist
         playlist = Playlist()
-        playlist.name = "Temporary Playlist"
+        playlist.name = f"Party {datetime.now().strftime('%d.%m.%Y %H:%M')}"
         playlist.save()
         while playlist.songs.count() < playlistLength:
             if party:
@@ -178,7 +199,6 @@ def newPlaylist(request: HttpRequest):
                 # Check if song is already in database
                 if Song.objects.filter(spotify_id=item['id']).exists():
                     song = Song.objects.get(spotify_id=item['id'])
-                    print("add", song.title, "to playlist")
                     playlist.songs.add(song)
                     continue
                 song = Song()
@@ -187,6 +207,7 @@ def newPlaylist(request: HttpRequest):
                 song.spotify_id = item['id']
                 song.popularity = item['popularity']
                 song.duration_ms = item['duration_ms']
+                song.cover = item['album']['images'][0]['url']
                 audio_features = my_sp.audio_features(song.spotify_id)[0]
                 song.danceability = audio_features["danceability"]
                 song.energy = audio_features["energy"]
@@ -202,7 +223,6 @@ def newPlaylist(request: HttpRequest):
                 # song.language = check_language_of_song(song.spotify_id)
                 song.language = "none"
                 song.save()
-                print("add", song.title, "to playlist")
                 playlist.songs.add(song)
         playlist.save()
         currentParty.playlists.add(playlist)
