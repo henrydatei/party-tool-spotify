@@ -51,9 +51,9 @@ class Blacklist(models.Model):
     
 class Playlist(models.Model):
     id = models.AutoField(primary_key=True)
-    spotify_id = models.TextField()
-    name = models.TextField()
-    description = models.TextField()
+    spotify_id = models.TextField(null=True, default=None)
+    name = models.TextField(null=True, default=None)
+    description = models.TextField(null=True, default=None)
     songs = models.ManyToManyField(Song)
     
     def __str__(self):

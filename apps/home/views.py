@@ -8,12 +8,12 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.template import loader
 from django.urls import reverse
 from django.shortcuts import render, redirect
-from django.db.models import Q
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import requests
-from polyglot.detect import Detector
+# import requests
+# from polyglot.detect import Detector
+import random
 
 from .models import Party, Song, Blacklist, Playlist, User
 
@@ -23,17 +23,17 @@ SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:8000/callback'
 sp_oauth = SpotifyOAuth(SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, SPOTIPY_REDIRECT_URI, scope="user-library-read")
 my_sp = spotipy.Spotify(auth_manager=sp_oauth)
 
-PARTY_FILTER = {"min_danceability": 0.8, "max_liveness": 0.3, "max_duration_ms": 240000, "min_popularity": 50, "max_instrumentalness": 0.1, "max_speechiness": 0.3, "min_valence": 0.5}
-CLUB_FILTER = {"min_energy": 0.9, "min_danceability": 0.5, "max_liveness": 0.3, "max_duration_ms": 240000, "min_tempo": 120, "min_popularity": 50, "max_speechiness": 0.3}
+PARTY_FILTER = {"min_danceability": 0.8, "max_liveness": 0.3, "max_duration_ms": 240000, "max_instrumentalness": 0.1, "max_speechiness": 0.3, "min_valence": 0.5}
+CLUB_FILTER = {"min_energy": 0.9, "min_danceability": 0.5, "max_liveness": 0.3, "max_duration_ms": 240000, "min_tempo": 120, "max_speechiness": 0.3}
 
-def check_language_of_song(trackID):
-    r = requests.get(f"https://spotify-lyric-api.herokuapp.com/?trackid={trackID}")
-    if r.status_code != 200:
-        return "none"
-    text = ""
-    for line in r.json()["lines"]:
-        text += line["words"] + "\n"
-    return Detector(text).language.code
+# def check_language_of_song(trackID):
+#     r = requests.get(f"https://spotify-lyric-api.herokuapp.com/?trackid={trackID}")
+#     if r.status_code != 200:
+#         return "none"
+#     text = ""
+#     for line in r.json()["lines"]:
+#         text += line["words"] + "\n"
+#     return Detector(text).language.code
 
 def convert_dict_filter_to_orm_filter(dict_filter: dict):
     filter_conditions = {}
@@ -83,7 +83,7 @@ def callback(request: HttpRequest):
     i = 0
     while i < number_of_liked_songs:
         results = sp.current_user_saved_tracks(limit=50, offset=i)
-        for item in results['items']:
+        for item in results['items']: # TODO: Process multiple songs at once, max 50
             # Check if song is already in database
             if Song.objects.filter(spotify_id=item['track']['id']).exists():
                 song = Song.objects.get(spotify_id=item['track']['id'])
@@ -117,9 +117,7 @@ def newParty(request: HttpRequest):
 
 def processSongs(request: HttpRequest):
     not_processed_songs = Song.objects.filter(processed=False)
-    # print(len(not_processed_songs))
-    for song in not_processed_songs:
-        # print(song.spotify_id)
+    for song in not_processed_songs: # TODO: Process multiple songs at once, max 50
         features = my_sp.audio_features(song.spotify_id)[0]
         song.danceability = features["danceability"]
         song.energy = features["energy"]
@@ -138,14 +136,77 @@ def processSongs(request: HttpRequest):
     return redirect('home')
 
 def newPlaylist(request: HttpRequest):
-    allSongs = Song.objects.filter()
-    processedSongs = Song.objects.filter(processed=True)
+    currentParty = Party.objects.filter(active=True).first()
+    allSongs = currentParty.songs_from_users.all()
+    processedSongs = currentParty.songs_from_users.filter(processed=True)
     blacklist = Blacklist.objects.filter()
-    partySongs = Song.objects.filter(**convert_dict_filter_to_orm_filter(PARTY_FILTER))
-    clubSongs = Song.objects.filter(**convert_dict_filter_to_orm_filter(CLUB_FILTER))
+    partySongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(PARTY_FILTER))
+    clubSongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(CLUB_FILTER))
     
-    # print(partySongs)
-    # print(clubSongs)
+    if request.method == 'POST':
+        batchSize = int(request.POST['batchSize'])
+        recommendatonSize = int(request.POST['recommendationSize'])
+        playlistLength = int(request.POST['playlistLength'])
+        if request.POST['filter'] == "party":
+            party = True
+        else:
+            party = False
+        
+        # Value checks
+        if batchSize < 1:
+            batchSize = 1
+        if batchSize > 5:
+            batchSize = 5
+        if recommendatonSize < 1:
+            recommendatonSize = 1
+        if recommendatonSize > 100:
+            recommendatonSize = 100
+            
+        # Create new Playlist
+        playlist = Playlist()
+        playlist.name = "Temporary Playlist"
+        playlist.save()
+        while playlist.songs.count() < playlistLength:
+            if party:
+                seed_songs = random.sample(list(partySongs), batchSize)
+                filter = PARTY_FILTER
+            else:
+                seed_songs = random.sample(list(clubSongs), batchSize)
+                filter = CLUB_FILTER
+            results = my_sp.recommendations(seed_tracks=[song.spotify_id for song in seed_songs], limit=recommendatonSize, **filter)
+            for item in results['tracks']: # TODO: Process multiple songs at once, max 50
+                # Check if song is already in database
+                if Song.objects.filter(spotify_id=item['id']).exists():
+                    song = Song.objects.get(spotify_id=item['id'])
+                    print("add", song.title, "to playlist")
+                    playlist.songs.add(song)
+                    continue
+                song = Song()
+                song.artist = ", ".join([artist['name'] for artist in item['artists']])
+                song.title = item['name']
+                song.spotify_id = item['id']
+                song.popularity = item['popularity']
+                song.duration_ms = item['duration_ms']
+                audio_features = my_sp.audio_features(song.spotify_id)[0]
+                song.danceability = audio_features["danceability"]
+                song.energy = audio_features["energy"]
+                song.key = audio_features["key"]
+                song.loudness = audio_features["loudness"]
+                song.mode = audio_features["mode"]
+                song.speechiness = audio_features["speechiness"]
+                song.acousticness = audio_features["acousticness"]
+                song.instrumentalness = audio_features["instrumentalness"]
+                song.liveness = audio_features["liveness"]
+                song.valence = audio_features["valence"]
+                song.tempo = audio_features["tempo"]
+                # song.language = check_language_of_song(song.spotify_id)
+                song.language = "none"
+                song.save()
+                print("add", song.title, "to playlist")
+                playlist.songs.add(song)
+        playlist.save()
+        currentParty.playlists.add(playlist)
+        currentParty.save()
     
     context = {
         "processedSongs": len(processedSongs),

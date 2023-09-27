@@ -99,6 +99,7 @@
                                         </div>
                                         <div class="card-body">
                                             <form action="#" method="POST">
+                                                {% csrf_token %}
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <h5 class="mt-5">Apply filter before and after recommendation algorithm</h5>
@@ -116,18 +117,18 @@
                                                         <h5 class="mt-5">Recommendation algorithm settings</h5>
                                                         <hr>
                                                         <div class="form-group">
-                                                            <label for="exampleInputPassword1">Batch Size</label>
-                                                            <input type="email" class="form-control" id="batchSize" aria-describedby="batchSizeHelp" value="5" name="batchSize">
+                                                            <label for="batchSize">Batch Size</label>
+                                                            <input type="number" min=1 max=5 class="form-control" id="batchSize" aria-describedby="batchSizeHelp" value="5" name="batchSize">
                                                             <small id="batchSizeHelp" class="form-text text-muted">How many songs go simultaneously in the recommendation algorithm. Must be between 1 and 5.</small>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="exampleInputPassword1">Recommendation Size</label>
-                                                            <input type="email" class="form-control" id="recommendationSize" aria-describedby="recommendationSizeHelp" value="10" name="recommendationSize">
+                                                            <label for="recommendationSize">Recommendation Size</label>
+                                                            <input type="number" min=1 max=100 class="form-control" id="recommendationSize" aria-describedby="recommendationSizeHelp" value="10" name="recommendationSize">
                                                             <small id="recommendationSizeHelp" class="form-text text-muted">How many songs one batch should recommend. Must be between 1 and 100.</small>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="exampleInputPassword1">Playlist Length</label>
-                                                            <input type="email" class="form-control" id="playlistLength" aria-describedby="playlistLengthHelp" value="100" name="playlistLength">
+                                                            <label for="playlistLength">Playlist Length</label>
+                                                            <input type="number" class="form-control" id="playlistLength" aria-describedby="playlistLengthHelp" value="100" name="playlistLength">
                                                             <small id="playlistLengthHelp" class="form-text text-muted">How long the generated playlist should be. Just an approximate value.</small>
                                                         </div>
                                                     </div>
