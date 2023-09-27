@@ -11,7 +11,7 @@ urlpatterns = [
     # The home page
     path('', views.index, name='home'),
     path('joinParty/', views.joinParty, name='joinParty'),
-    path('callback/', views.callback, name='callback'),
+    path('callback', views.callback, name='callback'),
     path('newParty/', views.newParty, name='newParty'),
     path('newPlaylist/', views.newPlaylist, name='newPlaylist'),
     path('processSongs/', views.processSongs, name='processSongs'),

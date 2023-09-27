@@ -1,0 +1,154 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Create a new playlist {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <!-- [ Main Content ] start -->
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <!-- [ breadcrumb ] start -->
+
+                    <!-- [ breadcrumb ] end -->
+                    <div class="main-body">
+                        <div class="page-wrapper">
+                            <!-- [ Main Content ] start -->
+                            <div class="row">
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-4">Processed Songs</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-9">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ processedSongs }}</h3>
+                                                </div>
+                                                <div class="col-3 text-right">
+                                                    <p class="m-b-0">{{ processedSongsPct }}%</p>
+                                                </div>
+                                            </div>
+                                            <div class="progress m-t-30" style="height: 7px;">
+                                                <div class="progress-bar progress-c-theme" role="progressbar"
+                                                        style="width: {{ processedSongsPct }}%;" aria-valuenow="{{ processedSongsPct }}" aria-valuemin="0"
+                                                        aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-4">Usable Songs (Party Filter)</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-9">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ useableSongsParty }}</h3>
+                                                </div>
+                                                <div class="col-3 text-right">
+                                                    <p class="m-b-0">{{ useableSongsPartyPct|floatformat }}%</p>
+                                                </div>
+                                            </div>
+                                            <div class="progress m-t-30" style="height: 7px;">
+                                                <div class="progress-bar progress-c-theme" role="progressbar"
+                                                        style="width: {{ useableSongsPartyPct }}%;" aria-valuenow="{{ useableSongsPartyPct }}" aria-valuemin="0"
+                                                        aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-4">Usable Songs (Club Filter)</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-9">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ useableSongsClub }}</h3>
+                                                </div>
+                                                <div class="col-3 text-right">
+                                                    <p class="m-b-0">{{ useableSongsClubPct|floatformat }}%</p>
+                                                </div>
+                                            </div>
+                                            <div class="progress m-t-30" style="height: 7px;">
+                                                <div class="progress-bar progress-c-theme" role="progressbar"
+                                                        style="width: {{ useableSongsClubPct }}%;" aria-valuenow="{{ useableSongsClubPct }}" aria-valuemin="0"
+                                                        aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-2">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-2">Blacklist Length</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-8">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ blacklistLength }}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Create new Playlist</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form action="#" method="POST">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h5 class="mt-5">Apply filter before and after recommendation algorithm</h5>
+                                                        <hr>
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="partyFilter" name="filter" class="custom-control-input" value="party">
+                                                            <label class="custom-control-label" for="partyFilter">Party Filter</label>
+                                                        </div>
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" id="clubFilter" name="filter" class="custom-control-input" value="club">
+                                                            <label class="custom-control-label" for="clubFilter">Club Filter</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h5 class="mt-5">Recommendation algorithm settings</h5>
+                                                        <hr>
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPassword1">Batch Size</label>
+                                                            <input type="email" class="form-control" id="batchSize" aria-describedby="batchSizeHelp" value="5" name="batchSize">
+                                                            <small id="batchSizeHelp" class="form-text text-muted">How many songs go simultaneously in the recommendation algorithm. Must be between 1 and 5.</small>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPassword1">Recommendation Size</label>
+                                                            <input type="email" class="form-control" id="recommendationSize" aria-describedby="recommendationSizeHelp" value="10" name="recommendationSize">
+                                                            <small id="recommendationSizeHelp" class="form-text text-muted">How many songs one batch should recommend. Must be between 1 and 100.</small>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPassword1">Playlist Length</label>
+                                                            <input type="email" class="form-control" id="playlistLength" aria-describedby="playlistLengthHelp" value="100" name="playlistLength">
+                                                            <small id="playlistLengthHelp" class="form-text text-muted">How long the generated playlist should be. Just an approximate value.</small>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Main Content ] end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->            
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
