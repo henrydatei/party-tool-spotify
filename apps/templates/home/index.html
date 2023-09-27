@@ -34,260 +34,275 @@
                                         </div>
                                     </div>
                                 {% else %}
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Danceability</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
+                                    {% if party.users.all|length = 0 %}
+                                        <div class="col-sm-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5>No users in party!</h5>
                                                 </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
+                                                <div class="card-block">
+                                                    <a href="/joinParty/">
+                                                        <button type="button" class="btn btn-primary" title="Join a Party" data-toggle="tooltip">Join a Party</button>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Energy</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                    {% else %}
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Danceability</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Loudness</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Speechiness</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Acousticness</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Instrumentalness</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Liveness</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Valence</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Popularity</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="progress m-t-30" style="height: 7px;">
-                                                    <div class="progress-bar progress-c-theme" role="progressbar"
-                                                            style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Tempo</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">150 BPM</h3>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-xl-12">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h5>Playlist 1</h5>
-                                            </div>
-                                            <div class="card-block table-border-style">
-                                                <div class="table-responsive">
-                                                    <table class="table table-hover">
-                                                        <thead>
-                                                            <tr>
-                                                                <th></th>
-                                                                <th>Song</th>
-                                                                <th>Length</th>
-                                                                <th>Danceability</th>
-                                                                <th>Energy</th>
-                                                                <th>Tempo</th>
-                                                                <th>Popularity</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
-                                                                <td>Example Song - Example Artist</td>
-                                                                <td>3:21</td>
-                                                                <td>82%</td>
-                                                                <td>82%</td>
-                                                                <td>150 BPM</td>
-                                                                <td>82%</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
-                                                                <td>Example Song - Example Artist</td>
-                                                                <td>3:21</td>
-                                                                <td>82%</td>
-                                                                <td>82%</td>
-                                                                <td>150 BPM</td>
-                                                                <td>82%</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
-                                                                <td>Example Song - Example Artist</td>
-                                                                <td>3:21</td>
-                                                                <td>82%</td>
-                                                                <td>82%</td>
-                                                                <td>150 BPM</td>
-                                                                <td>82%</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Users</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">10</h3>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Energy</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Songs from Users</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">317</h3>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Loudness</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 col-xl-2">
-                                        <div class="card daily-sales">
-                                            <div class="card-block">
-                                                <h6 class="mb-2">Filtered by blacklist</h6>
-                                                <div class="row d-flex align-items-center">
-                                                    <div class="col-8">
-                                                        <h3 class="f-w-300 d-flex align-items-center m-b-0">2</h3>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Speechiness</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Acousticness</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Instrumentalness</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Liveness</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Valence</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Popularity</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">78%</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="progress m-t-30" style="height: 7px;">
+                                                        <div class="progress-bar progress-c-theme" role="progressbar"
+                                                                style="width: 67%;" aria-valuenow="67" aria-valuemin="0"
+                                                                aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Tempo</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">150 BPM</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5>Playlist 1</h5>
+                                                </div>
+                                                <div class="card-block table-border-style">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th></th>
+                                                                    <th>Song</th>
+                                                                    <th>Length</th>
+                                                                    <th>Danceability</th>
+                                                                    <th>Energy</th>
+                                                                    <th>Tempo</th>
+                                                                    <th>Popularity</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
+                                                                    <td>Example Song - Example Artist</td>
+                                                                    <td>3:21</td>
+                                                                    <td>82%</td>
+                                                                    <td>82%</td>
+                                                                    <td>150 BPM</td>
+                                                                    <td>82%</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
+                                                                    <td>Example Song - Example Artist</td>
+                                                                    <td>3:21</td>
+                                                                    <td>82%</td>
+                                                                    <td>82%</td>
+                                                                    <td>150 BPM</td>
+                                                                    <td>82%</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th scope="row"><img src="https://i.scdn.co/image/ab67616d000048511b96e645016c4d431842aa93" height="30" width="30"></img></th>
+                                                                    <td>Example Song - Example Artist</td>
+                                                                    <td>3:21</td>
+                                                                    <td>82%</td>
+                                                                    <td>82%</td>
+                                                                    <td>150 BPM</td>
+                                                                    <td>82%</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Users</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">10</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Songs from Users</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">317</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-xl-2">
+                                            <div class="card daily-sales">
+                                                <div class="card-block">
+                                                    <h6 class="mb-2">Filtered by blacklist</h6>
+                                                    <div class="row d-flex align-items-center">
+                                                        <div class="col-8">
+                                                            <h3 class="f-w-300 d-flex align-items-center m-b-0">2</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                             <!-- [ Main Content ] end -->
