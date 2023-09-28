@@ -25,7 +25,6 @@ class Song(models.Model):
     tempo = models.FloatField(default=None, null=True)
     duration_ms = models.IntegerField()
     popularity = models.IntegerField()
-    language = models.TextField(default=None, null=True)
     processed = models.BooleanField(default=False)
     cover = models.TextField()
     

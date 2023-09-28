@@ -11,31 +11,39 @@ from django.shortcuts import render, redirect
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-# import requests
-# from polyglot.detect import Detector
 import random
 import numpy as np
 from datetime import datetime
+from decouple import config
 
 from .models import Party, Song, Blacklist, Playlist, User
 
-SPOTIPY_CLIENT_ID = '***REMOVED***'
-SPOTIPY_CLIENT_SECRET = '***REMOVED***'
-SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:8000/callback'
-sp_oauth = SpotifyOAuth(SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, SPOTIPY_REDIRECT_URI, scope="user-library-read")
+# read environment variables
+SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
+SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
+
+# login to spotify
+sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read")
 my_sp = spotipy.Spotify(auth_manager=sp_oauth)
 
-PARTY_FILTER = {"min_danceability": 0.8, "max_liveness": 0.3, "max_duration_ms": 240000, "max_instrumentalness": 0.1, "max_speechiness": 0.3, "min_valence": 0.5}
-CLUB_FILTER = {"min_energy": 0.9, "min_danceability": 0.5, "max_liveness": 0.3, "max_duration_ms": 240000, "min_tempo": 120, "max_speechiness": 0.3}
-
-# def check_language_of_song(trackID):
-#     r = requests.get(f"https://spotify-lyric-api.herokuapp.com/?trackid={trackID}")
-#     if r.status_code != 200:
-#         return "none"
-#     text = ""
-#     for line in r.json()["lines"]:
-#         text += line["words"] + "\n"
-#     return Detector(text).language.code
+# filter for songs
+PARTY_FILTER = {
+    "min_danceability": 0.8, 
+    "max_liveness": 0.3, 
+    "max_duration_ms": 240000, 
+    "max_instrumentalness": 0.1, 
+    "max_speechiness": 0.3, 
+    "min_valence": 0.5
+}
+CLUB_FILTER = {
+    "min_energy": 0.9, 
+    "min_danceability": 0.5, 
+    "max_liveness": 0.3, 
+    "max_duration_ms": 240000, 
+    "min_tempo": 120, 
+    "max_speechiness": 0.3
+}
 
 def convert_dict_filter_to_orm_filter(dict_filter: dict):
     filter_conditions = {}
@@ -151,8 +159,6 @@ def processSongs(request: HttpRequest):
         song.liveness = features["liveness"]
         song.valence = features["valence"]
         song.tempo = features["tempo"]
-        # song.language = check_language_of_song(song.spotify_id)
-        song.language = "none"
         song.save()
     return redirect('home')
 
@@ -220,8 +226,6 @@ def newPlaylist(request: HttpRequest):
                 song.liveness = audio_features["liveness"]
                 song.valence = audio_features["valence"]
                 song.tempo = audio_features["tempo"]
-                # song.language = check_language_of_song(song.spotify_id)
-                song.language = "none"
                 song.save()
                 playlist.songs.add(song)
         playlist.save()
