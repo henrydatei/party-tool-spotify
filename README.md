@@ -22,6 +22,5 @@ To get the Spotify credentials, you need to create an app on the [Spotify Develo
 
 Run with (after clone and cd into the directory)
 ```bash
-cd spotify_party
 python3 manage.py runserver
 ```
