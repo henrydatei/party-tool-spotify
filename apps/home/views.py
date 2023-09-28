@@ -164,6 +164,8 @@ def processSongs(request: HttpRequest):
 
 def newPlaylist(request: HttpRequest):
     currentParty = Party.objects.filter(active=True).first()
+    if not currentParty:
+        return redirect('home')
     allSongs = currentParty.songs_from_users.all()
     processedSongs = currentParty.songs_from_users.filter(processed=True)
     blacklist = Blacklist.objects.filter()
