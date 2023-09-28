@@ -16,7 +16,7 @@ import numpy as np
 from datetime import datetime
 from decouple import config
 
-from .models import Party, Song, Blacklist, Playlist, User
+from .models import Party, Song, Blacklist, Playlist, User, Artist
 
 # read environment variables
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
@@ -78,6 +78,7 @@ def index(request: HttpRequest):
         'tempo': np.mean([song.tempo for song in allSongsinPlaylists]),
         'popularity': np.mean([song.popularity for song in allSongsinPlaylists]),
         'playlists': currentParty.playlists.all(),
+        'filtered_by_blacklist': sum([playlist.songs_filtered_by_blacklist.count() for playlist in currentParty.playlists.all()]),
     }
 
     html_template = loader.get_template('home/index.html')
@@ -118,12 +119,18 @@ def callback(request: HttpRequest):
                 party.songs_from_users.add(song)
                 continue
             song = Song()
-            song.artist = ", ".join([artist['name'] for artist in item['track']['artists']])
+            for artist in item['track']['artists']:
+                if not Artist.objects.filter(spotify_id=artist['id']).exists():
+                    artist = Artist()
+                    artist.name = artist['name']
+                    artist.spotify_id = artist['id']
+                    artist.save()
+                song.artists.add(Artist.objects.get(spotify_id=artist['id']))
             song.title = item['track']['name']
             song.spotify_id = item['track']['id']
             song.popularity = item['track']['popularity']
             song.duration_ms = item['track']['duration_ms']
-            song.cover_url = item['track']['album']['images'][0]['url']
+            song.cover = item['track']['album']['images'][0]['url']
             song.save()
             party.songs_from_users.add(song)
         i += 50
@@ -168,9 +175,22 @@ def newPlaylist(request: HttpRequest):
         return redirect('home')
     allSongs = currentParty.songs_from_users.all()
     processedSongs = currentParty.songs_from_users.filter(processed=True)
-    blacklist = Blacklist.objects.filter()
-    partySongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(PARTY_FILTER))
-    clubSongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(CLUB_FILTER))
+    
+    # The Blacklist
+    blacklist_songs = Blacklist.objects.filter(type="title")
+    blacklist_artists_ids = [item.spotify_id for item in Blacklist.objects.filter(type="artist")]
+    songs_from_blacklisted_artists = Song.objects.filter(artists__spotify_id__in=blacklist_artists_ids)
+    blacklisted_song_ids = [item.spotify_id for item in blacklist_songs]
+    blacklisted_artist_song_ids = [song.spotify_id for song in songs_from_blacklisted_artists]
+    all_blacklisted_ids = set(blacklisted_song_ids + blacklisted_artist_song_ids)
+    partySongs = currentParty.songs_from_users.filter(
+        **convert_dict_filter_to_orm_filter(PARTY_FILTER),
+        spotify_id__not_in=all_blacklisted_ids
+    )
+    clubSongs = currentParty.songs_from_users.filter(
+        **convert_dict_filter_to_orm_filter(CLUB_FILTER),
+        spotify_id__not_in=all_blacklisted_ids
+    )
     
     if request.method == 'POST':
         batchSize = int(request.POST['batchSize'])
@@ -210,7 +230,13 @@ def newPlaylist(request: HttpRequest):
                     playlist.songs.add(song)
                     continue
                 song = Song()
-                song.artist = ", ".join([artist['name'] for artist in item['artists']])
+                for artist in item['track']['artists']:
+                    if not Artist.objects.filter(spotify_id=artist['id']).exists():
+                        artist = Artist()
+                        artist.name = artist['name']
+                        artist.spotify_id = artist['id']
+                        artist.save()
+                    song.artists.add(Artist.objects.get(spotify_id=artist['id']))
                 song.title = item['name']
                 song.spotify_id = item['id']
                 song.popularity = item['popularity']
@@ -229,6 +255,17 @@ def newPlaylist(request: HttpRequest):
                 song.valence = audio_features["valence"]
                 song.tempo = audio_features["tempo"]
                 song.save()
+                # Check if any artist is blacklisted
+                if song.artists.filter(spotify_id__in=blacklist_artists_ids).exists():
+                    playlist.songs_filtered_by_blacklist.add(song)
+                    continue
+                # Check if song is blacklisted
+                if Blacklist.objects.filter(spotify_id=song.spotify_id, type="title").exists():
+                    playlist.songs_filtered_by_blacklist.add(song)
+                    continue
+                # Check if song is already in playlist
+                if playlist.songs.filter(spotify_id=song.spotify_id).exists():
+                    continue
                 playlist.songs.add(song)
         playlist.save()
         currentParty.playlists.add(playlist)
@@ -241,10 +278,73 @@ def newPlaylist(request: HttpRequest):
         "useableSongsPartyPct": len(partySongs) / len(processedSongs) * 100 if len(processedSongs) > 0 else 0,
         "useableSongsClub": len(clubSongs),
         "useableSongsClubPct": len(clubSongs) / len(processedSongs) * 100 if len(processedSongs) > 0 else 0,
-        "blacklistLength": len(blacklist),
+        "blacklistLength": len(all_blacklisted_ids),
     }
     
     return render(request, 'home/newPlaylist.html', context)
+
+def addToBlacklist(request: HttpRequest):
+    if request.method == 'POST':
+        # Check which preset is selected
+        if request.POST['preset'] == "deutschrap":
+            deutschrapper = ["Sido","Bushido","Kool Savas","Casper","Marteria","Kollegah","Farid Bang","Capital Bra","RAF Camora","Bonez MC","Ufo361","RIN","Luciano","Kontra K","Nimo","Eunique","Shirin David","Juju","Loredana","Sami","Mero","Azet","Zuna","Fler","Haftbefehl","Celo & Abdi","Trettmann","Alligatoah"]
+
+            for rapper in deutschrapper:
+                result = my_sp.search(q='artist:' + rapper, type='artist')
+                try:
+                    artist_id = result['artists']['items'][0]['id']
+                    if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
+                        Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                except IndexError:
+                    continue
+        elif request.POST["url_or_id"] and request.POST["type"]:
+            url_or_id = request.POST["url_or_id"]
+            type = request.POST["type"]
+            if type == "artist":
+                try:
+                    result = my_sp.artist(url_or_id)
+                    artist_id = result['id']
+                    if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
+                        Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                except IndexError:
+                    pass
+            elif type == "title":
+                try:
+                    result = my_sp.track(url_or_id)
+                    track_id = result['id']
+                    if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
+                        Blacklist.objects.create(spotify_id=track_id, type="title")
+                except IndexError:
+                    pass 
+            elif type == "playlist_artist":
+                try:
+                    result = my_sp.playlist(url_or_id)
+                    for item in result['tracks']['items']:
+                        for artist in item['track']['artists']:
+                            artist_id = artist['id']
+                            if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
+                                Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                except IndexError:
+                    pass
+            elif type == "playlist_title":
+                try:
+                    result = my_sp.playlist(url_or_id)
+                    for item in result['tracks']['items']:
+                        track_id = item['track']['id']
+                        if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
+                            Blacklist.objects.create(spotify_id=track_id, type="title")
+                except IndexError:
+                    pass
+                
+    blacklist_songs = Blacklist.objects.filter(type="title").count()
+    blacklist_artists = Blacklist.objects.filter(type="artist").count()
+    
+    context = {
+        'blacklist_songs': blacklist_songs,
+        'blacklist_artists': blacklist_artists,
+    }
+    
+    return render(request, 'home/addToBlacklist.html', context)
 
 def pages(request: HttpRequest):
     context = {}

@@ -1,0 +1,105 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Add to blacklist {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <!-- [ Main Content ] start -->
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <!-- [ breadcrumb ] start -->
+
+                    <!-- [ breadcrumb ] end -->
+                    <div class="main-body">
+                        <div class="page-wrapper">
+                            <!-- [ Main Content ] start -->
+                            <div class="row">
+                                <div class="col-md-6 col-xl-2">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-2">Songs on blacklist</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-8">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0"> {{ blacklist_songs }}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-2">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-2">Artists on blacklist</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-8">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-0"> {{ blacklist_artists }}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Add to the blacklist</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5>Presets</h5>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <form class="form-inline" action="#" method="POST">
+                                                        {% csrf_token %}
+                                                        <div class="form-group mb-2">
+                                                            <input type="hidden" readonly class="form-control-plaintext" value="deutschrap" name="preset">
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary mb-2">Deutschrap</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <h5 class="mt-5">Single Entry</h5>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <form method="POST" action="#">
+                                                        <div class="form-group mb-2">
+                                                            <label for="blacklist_type">Type and blacklisting process</label>
+                                                            <select class="form-control" id="blacklist_type" name="type">
+                                                                <option value="artist">artist</option>
+                                                                <option value="title">title</option>
+                                                                <option value="playlist_title">playlist, blacklist titles</option>
+                                                                <option value="playlist_artist">playlist, blacklist artists</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label for="url_or_id">URL or Spotify ID</label>
+                                                            <input type="text" class="form-control" id="url_or_id" placeholder="URL or Spotify ID" name="url_or_id">
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary mb-2">Add to blacklist</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Main Content ] end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->            
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

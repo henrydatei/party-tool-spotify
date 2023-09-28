@@ -8,8 +8,15 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Artist(models.Model):
+    spotify_id = models.TextField(primary_key=True)
+    name = models.TextField()
+    
+    def __str__(self):
+        return f"{self.name} - {self.spotify_id}"
+
 class Song(models.Model):
-    artist = models.TextField()
+    artists = models.ManyToManyField(Artist)
     title = models.TextField()
     spotify_id = models.TextField(primary_key=True)
     danceability = models.FloatField(null=True, default=None)
@@ -55,6 +62,7 @@ class Playlist(models.Model):
     name = models.TextField(null=True, default=None)
     description = models.TextField(null=True, default=None)
     songs = models.ManyToManyField(Song)
+    songs_filtered_by_blacklist = models.ManyToManyField(Song, related_name="songs_filtered_by_blacklist")
     
     def __str__(self):
         return f"{self.name} - {self.description}"

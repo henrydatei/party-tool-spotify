@@ -247,7 +247,13 @@
                                                                         {% for song in playlist.songs.all %}
                                                                             <tr>
                                                                                 <th scope="row"><img src="{{ song.cover }}" height="30" width="30"></img></th>
-                                                                                <td>{{ song.title }} - {{ song.artist }}</td>
+                                                                                <td>
+                                                                                    {{ song.title }} by 
+                                                                                    {% for artist in song.artists.all %}
+                                                                                        {% if not forloop.first %}, {% endif %}
+                                                                                        {{ artist.name }}
+                                                                                    {% endfor %}
+                                                                                </td>
                                                                                 <td>{{ song.duration_ms|milliseconds_to_mmss }}</td>
                                                                                 <td>{{ song.danceability|multiply:100|floatformat }}%</td>
                                                                                 <td>{{ song.energy|multiply:100|floatformat }}%</td>
@@ -292,7 +298,7 @@
                                                         <h6 class="mb-2">Filtered by blacklist</h6>
                                                         <div class="row d-flex align-items-center">
                                                             <div class="col-8">
-                                                                <h3 class="f-w-300 d-flex align-items-center m-b-0">0</h3>
+                                                                <h3 class="f-w-300 d-flex align-items-center m-b-0"> {{ filtered_by_blacklist }}</h3>
                                                             </div>
                                                         </div>
                                                     </div>
