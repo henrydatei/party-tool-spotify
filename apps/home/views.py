@@ -288,7 +288,6 @@ def addToBlacklist(request: HttpRequest):
         # Check which preset is selected
         if request.POST['preset'] == "deutschrap":
             deutschrapper = ["Sido","Bushido","Kool Savas","Casper","Marteria","Kollegah","Farid Bang","Capital Bra","RAF Camora","Bonez MC","Ufo361","RIN","Luciano","Kontra K","Nimo","Eunique","Shirin David","Juju","Loredana","Sami","Mero","Azet","Zuna","Fler","Haftbefehl","Celo & Abdi","Trettmann","Alligatoah"]
-
             for rapper in deutschrapper:
                 result = my_sp.search(q='artist:' + rapper, type='artist')
                 try:
@@ -296,6 +295,19 @@ def addToBlacklist(request: HttpRequest):
                     if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
                         Blacklist.objects.create(spotify_id=artist_id, type="artist")
                 except IndexError:
+                    continue
+                
+            playlists_deutschrap = ["37i9dQZF1DX36edUJpD76c", "37i9dQZF1DWSTqUqJcxFk6", "37i9dQZF1DX2lUf1uE6Mre", "37i9dQZF1DX4TiN7pMwV0Z", "37i9dQZF1DX1shdIjFVnvq", "37i9dQZF1DX0Na9FTYame5", "37i9dQZF1DXcEJw9C2rUbi", "37i9dQZF1DX1zpUaiwr15A", "37i9dQZF1DX2uJ1OVfn3CH", "37i9dQZF1DXbWS0mKtnghU", "37i9dQZF1DWSzguhfGl55y", "37i9dQZF1DX1q42kBiHxxd", "37i9dQZF1DX5sbPvjd2Huv", "37i9dQZF1DWZRGaeImgsVz", "37i9dQZF1DX59oR8I71XgB", "37i9dQZF1DX1axYuQ4oR2e"]
+            for playlist in playlists_deutschrap:
+                try:
+                    result = my_sp.playlist(playlist)
+                    for item in result['tracks']['items']:
+                        for artist in item['track']['artists']:
+                            artist_id = artist['id']
+                            if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
+                                Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                except Exception as e:
+                    print(f"Error with {playlist}: {e}")
                     continue
         elif request.POST["url_or_id"] and request.POST["type"]:
             url_or_id = request.POST["url_or_id"]
@@ -307,6 +319,7 @@ def addToBlacklist(request: HttpRequest):
                     if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
                         Blacklist.objects.create(spotify_id=artist_id, type="artist")
                 except IndexError:
+                    print(f"Artist {url_or_id} not found")
                     pass
             elif type == "title":
                 try:
@@ -315,6 +328,7 @@ def addToBlacklist(request: HttpRequest):
                     if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
                         Blacklist.objects.create(spotify_id=track_id, type="title")
                 except IndexError:
+                    print(f"Title {url_or_id} not found")
                     pass 
             elif type == "playlist_artist":
                 try:
@@ -324,7 +338,8 @@ def addToBlacklist(request: HttpRequest):
                             artist_id = artist['id']
                             if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
                                 Blacklist.objects.create(spotify_id=artist_id, type="artist")
-                except IndexError:
+                except Exception as e:
+                    print(f"Error with {playlist}: {e}")
                     pass
             elif type == "playlist_title":
                 try:
@@ -333,7 +348,8 @@ def addToBlacklist(request: HttpRequest):
                         track_id = item['track']['id']
                         if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
                             Blacklist.objects.create(spotify_id=track_id, type="title")
-                except IndexError:
+                except Exception as e:
+                    print(f"Error with {playlist}: {e}")
                     pass
                 
     blacklist_songs = Blacklist.objects.filter(type="title").count()
