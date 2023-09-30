@@ -30,11 +30,13 @@ my_sp = spotipy.Spotify(auth_manager=sp_oauth)
 # filter for songs
 PARTY_FILTER = {
     "min_danceability": 0.8, 
+    "min_energy": 0.6,
     "max_liveness": 0.3, 
     "max_duration_ms": 240000, 
     "max_instrumentalness": 0.1, 
     "max_speechiness": 0.3, 
-    "min_valence": 0.5
+    "min_valence": 0.5,
+    "min_popularity": 20
 }
 CLUB_FILTER = {
     "min_energy": 0.9, 
@@ -42,7 +44,8 @@ CLUB_FILTER = {
     "max_liveness": 0.3, 
     "max_duration_ms": 240000, 
     "min_tempo": 120, 
-    "max_speechiness": 0.3
+    "max_speechiness": 0.3,
+    "min_popularity": 20
 }
 
 def convert_dict_filter_to_orm_filter(dict_filter: dict):
