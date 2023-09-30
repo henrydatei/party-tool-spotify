@@ -196,7 +196,7 @@ def newPlaylist(request: HttpRequest):
     songs_from_blacklisted_artists = Song.objects.filter(artists__spotify_id__in=blacklist_artists_ids)
     blacklisted_song_ids = [item.spotify_id for item in blacklist_songs]
     blacklisted_artist_song_ids = [song.spotify_id for song in songs_from_blacklisted_artists]
-    all_blacklisted_ids = set(blacklisted_song_ids + blacklisted_artist_song_ids)
+    all_blacklisted_ids = list(set(blacklisted_song_ids + blacklisted_artist_song_ids))
     partySongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(PARTY_FILTER)).exclude(spotify_id__in=all_blacklisted_ids)
     clubSongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(CLUB_FILTER)).exclude(spotify_id__in=all_blacklisted_ids)
     
@@ -287,7 +287,6 @@ def newPlaylist(request: HttpRequest):
         "useableSongsPartyPct": len(partySongs) / len(processedSongs) * 100 if len(processedSongs) > 0 else 0,
         "useableSongsClub": len(clubSongs),
         "useableSongsClubPct": len(clubSongs) / len(processedSongs) * 100 if len(processedSongs) > 0 else 0,
-        "blacklistLength": len(all_blacklisted_ids),
     }
     
     return render(request, 'home/newPlaylist.html', context)
@@ -303,7 +302,7 @@ def addToBlacklist(request: HttpRequest):
                 try:
                     artist_id = result['artists']['items'][0]['id']
                     artist_name = result['artists']['items'][0]['name']
-                    if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
+                    if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists() and rapper == artist_name:
                         Blacklist.objects.create(spotify_id=artist_id, type="artist", name=artist_name)
                 except IndexError:
                     print(f"Artist {rapper} not found")
