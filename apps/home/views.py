@@ -192,14 +192,8 @@ def newPlaylist(request: HttpRequest):
     blacklisted_song_ids = [item.spotify_id for item in blacklist_songs]
     blacklisted_artist_song_ids = [song.spotify_id for song in songs_from_blacklisted_artists]
     all_blacklisted_ids = set(blacklisted_song_ids + blacklisted_artist_song_ids)
-    partySongs = currentParty.songs_from_users.filter(
-        **convert_dict_filter_to_orm_filter(PARTY_FILTER),
-        spotify_id__not_in=all_blacklisted_ids
-    )
-    clubSongs = currentParty.songs_from_users.filter(
-        **convert_dict_filter_to_orm_filter(CLUB_FILTER),
-        spotify_id__not_in=all_blacklisted_ids
-    )
+    partySongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(PARTY_FILTER)).exclude(spotify_id__in=all_blacklisted_ids)
+    clubSongs = currentParty.songs_from_users.filter(**convert_dict_filter_to_orm_filter(CLUB_FILTER)).exclude(spotify_id__in=all_blacklisted_ids)
     
     if request.method == 'POST':
         batchSize = int(request.POST['batchSize'])
