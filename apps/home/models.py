@@ -39,7 +39,7 @@ class Song(models.Model):
         fields_to_check = [
             self.danceability, self.energy, self.key, self.loudness, self.mode,
             self.speechiness, self.acousticness, self.instrumentalness, 
-            self.liveness, self.valence, self.tempo, self.language
+            self.liveness, self.valence, self.tempo
         ]
 
         self.processed = all(field is not None for field in fields_to_check)
@@ -47,7 +47,7 @@ class Song(models.Model):
         super(Song, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.title} - {self.artist}"
+        return f"{self.title} - {', '.join([artist.name for artist in self.artists.all()])}"
     
 class Blacklist(models.Model):
     spotify_id = models.TextField(primary_key=True)

@@ -125,18 +125,19 @@ def callback(request: HttpRequest):
                 party.songs_from_users.add(song)
                 continue
             song = Song()
-            for artist in item['track']['artists']:
-                if not Artist.objects.filter(spotify_id=artist['id']).exists():
-                    artist = Artist()
-                    artist.name = artist['name']
-                    artist.spotify_id = artist['id']
-                    artist.save()
-                song.artists.add(Artist.objects.get(spotify_id=artist['id']))
             song.title = item['track']['name']
             song.spotify_id = item['track']['id']
             song.popularity = item['track']['popularity']
             song.duration_ms = item['track']['duration_ms']
             song.cover = item['track']['album']['images'][0]['url']
+            song.save()
+            for artist in item['track']['artists']:
+                if not Artist.objects.filter(spotify_id=artist['id']).exists():
+                    a = Artist()
+                    a.name = artist['name']
+                    a.spotify_id = artist['id']
+                    a.save()
+                song.artists.add(Artist.objects.get(spotify_id=artist['id']))
             song.save()
             party.songs_from_users.add(song)
         i += 50
@@ -238,13 +239,6 @@ def newPlaylist(request: HttpRequest):
                     playlist.songs.add(song)
                     continue
                 song = Song()
-                for artist in item['track']['artists']:
-                    if not Artist.objects.filter(spotify_id=artist['id']).exists():
-                        artist = Artist()
-                        artist.name = artist['name']
-                        artist.spotify_id = artist['id']
-                        artist.save()
-                    song.artists.add(Artist.objects.get(spotify_id=artist['id']))
                 song.title = item['name']
                 song.spotify_id = item['id']
                 song.popularity = item['popularity']
@@ -262,6 +256,14 @@ def newPlaylist(request: HttpRequest):
                 song.liveness = audio_features["liveness"]
                 song.valence = audio_features["valence"]
                 song.tempo = audio_features["tempo"]
+                song.save()
+                for artist in item['artists']:
+                    if not Artist.objects.filter(spotify_id=artist['id']).exists():
+                        a = Artist()
+                        a.name = artist['name']
+                        a.spotify_id = artist['id']
+                        a.save()
+                    song.artists.add(Artist.objects.get(spotify_id=artist['id']))
                 song.save()
                 # Check if any artist is blacklisted
                 if song.artists.filter(spotify_id__in=blacklist_artists_ids).exists():
