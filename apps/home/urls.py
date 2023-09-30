@@ -16,6 +16,7 @@ urlpatterns = [
     path('newPlaylist/', views.newPlaylist, name='newPlaylist'),
     path('processSongs/', views.processSongs, name='processSongs'),
     path('addToBlacklist/', views.addToBlacklist, name='addToBlacklist'),
+    path('addPlaylistToSpotify/<int:playlist_id>', views.addPlaylistToSpotify, name='addPlaylistToSpotify'),
 
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),

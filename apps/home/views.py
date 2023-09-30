@@ -24,8 +24,9 @@ SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
 
 # login to spotify
-sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read")
+sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public")
 my_sp = spotipy.Spotify(auth_manager=sp_oauth)
+my_id = my_sp.me()["id"]
 
 # filter for songs
 PARTY_FILTER = {
@@ -370,6 +371,14 @@ def addToBlacklist(request: HttpRequest):
     }
     
     return render(request, 'home/addToBlacklist.html', context)
+
+def addPlaylistToSpotify(request: HttpRequest, playlist_id: int):
+    playlist = Playlist.objects.get(id=playlist_id)
+    created_playlist = my_sp.user_playlist_create(my_id, playlist.name, public=True, collaborative=False, description=playlist.description)
+    my_sp.user_playlist_add_tracks(my_id, created_playlist["id"], [song.spotify_id for song in playlist.songs.all()])
+    playlist.spotify_id = created_playlist["id"]
+    playlist.save()
+    return redirect('home')
 
 def pages(request: HttpRequest):
     context = {}
