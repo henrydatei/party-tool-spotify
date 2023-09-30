@@ -60,6 +60,12 @@ def convert_dict_filter_to_orm_filter(dict_filter: dict):
 
 def index(request: HttpRequest):
     currentParty = Party.objects.filter(active=True).first()
+    if not currentParty:
+        return render(request, 'home/noParty.html')
+    if not currentParty.users.all():
+        return render(request, 'home/noUsers.html')
+    if not currentParty.playlists.all():
+        return render(request, 'home/noPlaylists.html')
     
     allSongsinPlaylists = []
     for playlist in currentParty.playlists.all():
@@ -87,7 +93,7 @@ def index(request: HttpRequest):
 def joinParty(request: HttpRequest):
     party = Party.objects.filter(active=True).first()
     if not party:
-        return redirect('home')
+        return render(request, 'home/noParty.html')
     else:
         auth_url = sp_oauth.get_authorize_url()
         return redirect(auth_url)
@@ -172,7 +178,9 @@ def processSongs(request: HttpRequest):
 def newPlaylist(request: HttpRequest):
     currentParty = Party.objects.filter(active=True).first()
     if not currentParty:
-        return redirect('home')
+        return render(request, 'home/noParty.html')
+    if not currentParty.users.all():
+        return render(request, 'home/noUsers.html')
     allSongs = currentParty.songs_from_users.all()
     processedSongs = currentParty.songs_from_users.filter(processed=True)
     
