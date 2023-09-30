@@ -293,7 +293,7 @@ def addToBlacklist(request: HttpRequest):
                 try:
                     artist_id = result['artists']['items'][0]['id']
                     if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
-                        Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                        Blacklist.objects.create(spotify_id=artist_id, type="artist", name=artist['name'])
                 except IndexError:
                     continue
                 
@@ -306,7 +306,7 @@ def addToBlacklist(request: HttpRequest):
                         for artist in item['track']['artists']:
                             artist_id = artist['id']
                             if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
-                                Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                                Blacklist.objects.create(spotify_id=artist_id, type="artist", name=artist['name'])
                 except Exception as e:
                     print(f"Error with {playlist}: {e}")
                     continue
@@ -319,7 +319,7 @@ def addToBlacklist(request: HttpRequest):
                     result = my_sp.artist(url_or_id)
                     artist_id = result['id']
                     if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
-                        Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                        Blacklist.objects.create(spotify_id=artist_id, type="artist", name=result['name'])
                 except IndexError:
                     print(f"Artist {url_or_id} not found")
                     pass
@@ -328,7 +328,7 @@ def addToBlacklist(request: HttpRequest):
                     result = my_sp.track(url_or_id)
                     track_id = result['id']
                     if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
-                        Blacklist.objects.create(spotify_id=track_id, type="title")
+                        Blacklist.objects.create(spotify_id=track_id, type="title", name=result['name'])
                 except IndexError:
                     print(f"Title {url_or_id} not found")
                     pass 
@@ -339,7 +339,7 @@ def addToBlacklist(request: HttpRequest):
                         for artist in item['track']['artists']:
                             artist_id = artist['id']
                             if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
-                                Blacklist.objects.create(spotify_id=artist_id, type="artist")
+                                Blacklist.objects.create(spotify_id=artist_id, type="artist", name=artist['name'])
                 except Exception as e:
                     print(f"Error with {playlist}: {e}")
                     pass
@@ -349,7 +349,7 @@ def addToBlacklist(request: HttpRequest):
                     for item in result['tracks']['items']:
                         track_id = item['track']['id']
                         if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
-                            Blacklist.objects.create(spotify_id=track_id, type="title")
+                            Blacklist.objects.create(spotify_id=track_id, type="title", name=item['track']['name'])
                 except Exception as e:
                     print(f"Error with {playlist}: {e}")
                     pass

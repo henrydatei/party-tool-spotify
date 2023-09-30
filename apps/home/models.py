@@ -52,9 +52,10 @@ class Song(models.Model):
 class Blacklist(models.Model):
     spotify_id = models.TextField(primary_key=True)
     type = models.TextField()
+    name = models.TextField()
     
     def __str__(self):
-        return f"{self.type} - {self.spotify_id}"
+        return f"{self.type} - {self.spotify_id} - {self.name}"
     
 class Playlist(models.Model):
     id = models.AutoField(primary_key=True)
