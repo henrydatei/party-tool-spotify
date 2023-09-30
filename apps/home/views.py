@@ -302,6 +302,7 @@ def addToBlacklist(request: HttpRequest):
                 try:
                     result = my_sp.playlist(playlist)
                     for item in result['tracks']['items']:
+                        # This might be a bit hard since e.g. Robin Schulz has collaborations with german rappers and we don't want to blacklist him
                         for artist in item['track']['artists']:
                             artist_id = artist['id']
                             if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
@@ -309,6 +310,7 @@ def addToBlacklist(request: HttpRequest):
                 except Exception as e:
                     print(f"Error with {playlist}: {e}")
                     continue
+        # Not preset selected, check if url or id is given
         elif request.POST["url_or_id"] and request.POST["type"]:
             url_or_id = request.POST["url_or_id"]
             type = request.POST["type"]
