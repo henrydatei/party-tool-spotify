@@ -30,3 +30,12 @@ python3 manage.py createsuperuser
 python3 manage.py runserver
 ```
 The first two commands are just nessesary for the first time and setup the database. The last one starts the server. You can access the tool on http://localhost:8000. If you want to have a look at the admin interface and edit/view/delete/... the database, you can access it on http://localhost:8000/admin. You can login with the superuser you created earlier.
+
+**Attention:** The tool needs a Spotify account to start. This account must also be the account that created the Spotify App on the Developer Dashboard. I am currently unable to provide a convenient way to login into this account, solution is to open a Python Shell in your home directory and run the following commands on your home computer (or any computer that has a web browser):
+```python
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+sp_oauth = SpotifyOAuth("SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "http://localhost:8080", scope="user-library-read,playlist-modify-public")
+my_sp = spotipy.Spotify(auth_manager=sp_oauth)
+```
+Obviously you have to add "http://localhost:8080" to your created Spotify App in the Developer Dashboard as a redirect URL. After doing all of this your browser should open, you log in and Spotipy creates a file named `.cache` in your home directory. Copy this file to your server where you want to deploy the application in the directory of the repository. Luckily all of this is not necessary if you're running this tool on your local computer.
