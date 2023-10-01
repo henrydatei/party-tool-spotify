@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from django import template
-from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpRequest, HttpResponseServerError
 from django.template import loader
 from django.urls import reverse
 from django.shortcuts import render, redirect
@@ -16,6 +16,7 @@ import numpy as np
 from datetime import datetime
 from decouple import config
 import pandas as pd
+import uuid
 
 from .models import Party, Song, Blacklist, Playlist, User, Artist
 
@@ -49,6 +50,10 @@ CLUB_FILTER = {
     "max_speechiness": 0.3,
     "min_popularity": 20
 }
+
+def get_user_cache_path(username):
+    return f".cache-{username}"
+
 
 def convert_dict_filter_to_orm_filter(dict_filter: dict):
     filter_conditions = {}
@@ -100,12 +105,27 @@ def joinParty(request: HttpRequest):
     if not party:
         return render(request, 'home/noParty.html')
     else:
-        auth_url = sp_oauth.get_authorize_url()
+        unique_identifier = str(uuid.uuid4())
+        request.session['user_unique_id'] = unique_identifier  # Speichern in der Session
+        cache_path = get_user_cache_path(unique_identifier)
+        user_sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=cache_path)
+        auth_url = user_sp_oauth.get_authorize_url()
         return redirect(auth_url)
 
 def callback(request: HttpRequest):
-    token_info = sp_oauth.get_access_token(request.GET.get('code'))
+    print("callback called")
+    
+    # Abrufen des eindeutigen Bezeichners aus der Session
+    unique_identifier = request.session.get('user_unique_id')
+    if not unique_identifier:
+        # Hier Fehlerbehandlung, falls der Bezeichner nicht gefunden wird
+        return HttpResponseServerError("Ein Fehler ist aufgetreten. Die Session konnte nicht gefunden werden.")
+
+    cache_path = get_user_cache_path(unique_identifier)
+    user_sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=cache_path)
+    token_info = user_sp_oauth.get_access_token(request.GET.get('code'))
     sp = spotipy.Spotify(auth=token_info['access_token'])
+    print(sp.me())
     
     # Create a new User
     user = User()
