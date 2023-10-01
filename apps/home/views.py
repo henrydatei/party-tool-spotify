@@ -25,8 +25,9 @@ SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
 
 # login to spotify
+token = spotipy.util.prompt_for_user_token("henrydatei", scope="user-library-read,playlist-modify-public", client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET, redirect_uri=SPOTIFY_REDIRECT_URI)
 sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public")
-my_sp = spotipy.Spotify(auth_manager=sp_oauth)
+my_sp = spotipy.Spotify(auth=token)
 my_id = my_sp.me()["id"]
 
 # filter for songs
