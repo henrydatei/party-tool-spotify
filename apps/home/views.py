@@ -23,7 +23,7 @@ from .models import Party, Song, Blacklist, Playlist, User, Artist
 # read environment variables
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
-SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
+SPOTIFY_REDIRECT_URI = config('SERVER') + "/callback"
 
 # login to spotify
 sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public")

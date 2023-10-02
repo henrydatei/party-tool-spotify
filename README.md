@@ -10,7 +10,7 @@ Create an .env file in the root directory with the following content:
 DEBUG=True
 
 # Deployment SERVER address
-SERVER=.appseed.us
+SERVER=ADRESS_OF_SERVER_E_G_127.0.0.1:8000
 
 # Used for CDN (in production)
 # No Slash at the end
@@ -19,9 +19,10 @@ ASSETS_ROOT=/static/assets
 # Spotify credentials
 SPOTIFY_CLIENT_ID=YOUR_CLIENT_ID
 SPOTIFY_CLIENT_SECRET=YOUR_CLIENT_SECRET
-SPOTIFY_REDIRECT_URI=YOUR_REDIRECT_URI
 ```
-To get the Spotify credentials, you need to create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and add the redirect URI to the app. The redirect URI should end with /callback (e.g. http://localhost:8000/callback).
+To get the Spotify credentials, you need to create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and add the redirect URI to the app. The redirect URI is your server ip + "/callback" (e.g. http://127.0.0.1:8000/callback).
+
+**Attention:** When you create a Spotify App this app is in developer mode which means not everyone can use it. To make it public you have to fill out a form on the Spotify Developer Dashboard. This can take a few days. Or you can add the users that should be able to use the app manually on the dashboard (Dashboard > YOUR_APP > Settings > User Management).
 
 Run with (after clone and cd into the directory)
 ```bash
