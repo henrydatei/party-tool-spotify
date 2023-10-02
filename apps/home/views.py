@@ -17,6 +17,7 @@ from datetime import datetime
 from decouple import config
 import pandas as pd
 import uuid
+from urllib.parse import urlparse, parse_qs
 
 from .models import Party, Song, Blacklist, Playlist, User, Artist
 
@@ -25,9 +26,22 @@ SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
 
-# login to spotify
+# login to spotify via CLI
 sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public")
-my_sp = spotipy.Spotify(auth_manager=sp_oauth)
+auth_url = sp_oauth.get_authorize_url()
+print(f"Please open the following link in a browser and authorise the application: \n{auth_url}")
+redirected_url = input("Please enter the entire redirect URL here: ")
+
+# Extract the `code` parameter from the URL
+parsed_url = urlparse(redirected_url)
+parsed_params = parse_qs(parsed_url.query)
+code = parsed_params.get("code", [None])[0]
+if not code:
+    print("No valid code was extracted from the URL provided.")
+    exit()
+
+token_info = sp_oauth.get_access_token(code)
+my_sp = spotipy.Spotify(auth=token_info['access_token'])
 my_id = my_sp.me()["id"]
 
 # filter for songs
