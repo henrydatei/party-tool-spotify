@@ -254,7 +254,7 @@ def newPlaylist(request: HttpRequest):
                 seed_songs = random.sample(list(clubSongs), batchSize)
                 filter = CLUB_FILTER
             results = my_sp.recommendations(seed_tracks=[song.spotify_id for song in seed_songs], limit=recommendatonSize, **filter)
-            for item in results['tracks']: # TODO: Process multiple songs at once, max 50
+            for item in results['tracks']:
                 # Check if song is already in database
                 if Song.objects.filter(spotify_id=item['id']).exists():
                     song = Song.objects.get(spotify_id=item['id'])
@@ -266,18 +266,6 @@ def newPlaylist(request: HttpRequest):
                 song.popularity = item['popularity']
                 song.duration_ms = item['duration_ms']
                 song.cover = item['album']['images'][0]['url']
-                audio_features = my_sp.audio_features(song.spotify_id)[0]
-                song.danceability = audio_features["danceability"]
-                song.energy = audio_features["energy"]
-                song.key = audio_features["key"]
-                song.loudness = audio_features["loudness"]
-                song.mode = audio_features["mode"]
-                song.speechiness = audio_features["speechiness"]
-                song.acousticness = audio_features["acousticness"]
-                song.instrumentalness = audio_features["instrumentalness"]
-                song.liveness = audio_features["liveness"]
-                song.valence = audio_features["valence"]
-                song.tempo = audio_features["tempo"]
                 song.save()
                 for artist in item['artists']:
                     if not Artist.objects.filter(spotify_id=artist['id']).exists():
@@ -302,6 +290,9 @@ def newPlaylist(request: HttpRequest):
         playlist.save()
         currentParty.playlists.add(playlist)
         currentParty.save()
+        
+        # process songs
+        return redirect('processSongs')
     
     context = {
         "processedSongs": len(processedSongs),
