@@ -208,8 +208,7 @@
                                                                     <td>
                                                                         {{ song.title }} by 
                                                                         {% for artist in song.artists.all %}
-                                                                            {% if not forloop.first %}, {% endif %}
-                                                                            {{ artist.name }}
+                                                                            {{ artist.name }}{% if not forloop.last %}, {% endif %}
                                                                         {% endfor %}
                                                                     </td>
                                                                     <td>{{ song.duration_ms|milliseconds_to_mmss }}</td>
