@@ -1,5 +1,5 @@
 # Spotify Party Tool
-A tool that can generate playlists for partys
+A tool that can generate playlists for partys based on the music taste of the party guests.
 
 I've always wanted to have a tool that can generate playlists for partys. On a party you have several people with different taste of music. To find music that anymore more or less likes is a pretty hard job and ususally results in a massive queue of songs because someone added 100s of his favourite songs to it. This is my attempt to create such a helping tool to solve this issue. Once set up you can create a party, users can join it and through the login process with Spotify this tool can access the liked songs of every party guest. It analyses them by calling Spotify's own [Audio Features API](https://developer.spotify.com/documentation/web-api/reference/get-audio-features). After that you can create a playlist from that list of songs using the [Recommendation API](https://developer.spotify.com/documentation/web-api/reference/get-recommendations) from Spotify. To find some songs suitable for partys we can use the audio features extraced earlier. This tool supports a blacklist for unwanted songs too. You can blacklist certains songs or artists and you can even extract these from a playlist on Spotify. I've already added a preset for the genre "Deutschrap" because I hate it and I never want to listen to that on a party. After creating the playlist you can export it to your Spotify and play it. Have fun!
 
@@ -20,7 +20,7 @@ ASSETS_ROOT=/static/assets
 SPOTIFY_CLIENT_ID=YOUR_CLIENT_ID
 SPOTIFY_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ```
-To get the Spotify credentials, you need to create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and add the redirect URI to the app. The redirect URI is your server ip + "/callback" (e.g. http://127.0.0.1:8000/callback).
+To get the Spotify credentials, you need to create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add the redirect URI to the app. The redirect URI is your server ip + "/callback" (e.g. http://127.0.0.1:8000/callback).
 
 **Attention:** When you create a Spotify App this app is in developer mode which means not everyone can use it. To make it public you have to fill out a form on the Spotify Developer Dashboard. This can take a few days. Or you can add the users that should be able to use the app manually on the dashboard (Dashboard > YOUR_APP > Settings > User Management).
 
