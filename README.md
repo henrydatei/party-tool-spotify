@@ -19,6 +19,7 @@ ASSETS_ROOT=/static/assets
 # Spotify credentials
 SPOTIFY_CLIENT_ID=YOUR_CLIENT_ID
 SPOTIFY_CLIENT_SECRET=YOUR_CLIENT_SECRET
+SPOTIFY_REDIRECT_URI=YOUR_REDIRECT_URI
 ```
 To get the Spotify credentials, you need to create an app on the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and add the redirect URI to the app. The redirect URI is your server ip + "/callback" (e.g. http://127.0.0.1:8000/callback).
 

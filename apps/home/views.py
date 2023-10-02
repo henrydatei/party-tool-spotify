@@ -23,7 +23,7 @@ from .models import Party, Song, Blacklist, Playlist, User, Artist
 # read environment variables
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
-SPOTIFY_REDIRECT_URI = config('SERVER') + "/callback"
+SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
 
 # login to spotify
 sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public")
@@ -115,9 +115,11 @@ def joinParty(request: HttpRequest):
 def callback(request: HttpRequest):
     unique_identifier = request.session.get('user_unique_id')
     if not unique_identifier:
-        return HttpResponseServerError("No unique identifier found in session.")
-
-    cache_path = get_user_cache_path(unique_identifier)
+        # return HttpResponseServerError("No unique identifier found in session.")
+        cache_path = None
+    else:
+        cache_path = get_user_cache_path(unique_identifier)
+        
     user_sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=cache_path)
     token_info = user_sp_oauth.get_access_token(request.GET.get('code'))
     sp = spotipy.Spotify(auth=token_info['access_token'])
