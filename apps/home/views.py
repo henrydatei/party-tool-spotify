@@ -138,7 +138,7 @@ def callback(request: HttpRequest):
     i = 0
     while i < number_of_liked_songs:
         results = sp.current_user_saved_tracks(limit=50, offset=i)
-        for item in results['items']: # TODO: Process multiple songs at once, max 50
+        for item in results['items']:
             # Check if song is already in database
             if Song.objects.filter(spotify_id=item['track']['id']).exists():
                 song = Song.objects.get(spotify_id=item['track']['id'])
@@ -179,21 +179,29 @@ def newParty(request: HttpRequest):
     return render(request, 'home/newParty.html')
 
 def processSongs(request: HttpRequest):
-    not_processed_songs = Song.objects.filter(processed=False)
-    for song in not_processed_songs: # TODO: Process multiple songs at once, max 50
-        features = my_sp.audio_features(song.spotify_id)[0]
-        song.danceability = features["danceability"]
-        song.energy = features["energy"]
-        song.key = features["key"]
-        song.loudness = features["loudness"]
-        song.mode = features["mode"]
-        song.speechiness = features["speechiness"]
-        song.acousticness = features["acousticness"]
-        song.instrumentalness = features["instrumentalness"]
-        song.liveness = features["liveness"]
-        song.valence = features["valence"]
-        song.tempo = features["tempo"]
-        song.save()
+    not_processed_songs = Song.objects.filter(processed=False).all()
+    song_ids = [song.spotify_id for song in not_processed_songs]
+    
+    # Process songs in batches of 100
+    for i in range(0, len(song_ids), 100):
+        batch_ids = song_ids[i:i+100]
+        features_list = my_sp.audio_features(batch_ids)
+        for j, features in enumerate(features_list):
+            if features:  # Check if features are available
+                song = not_processed_songs[i + j]  # Get the corresponding song from the list of not processed songs
+                song.danceability = features["danceability"]
+                song.energy = features["energy"]
+                song.key = features["key"]
+                song.loudness = features["loudness"]
+                song.mode = features["mode"]
+                song.speechiness = features["speechiness"]
+                song.acousticness = features["acousticness"]
+                song.instrumentalness = features["instrumentalness"]
+                song.liveness = features["liveness"]
+                song.valence = features["valence"]
+                song.tempo = features["tempo"]
+                song.save()
+
     return redirect('home')
 
 def newPlaylist(request: HttpRequest):
