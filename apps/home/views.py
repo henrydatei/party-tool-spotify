@@ -49,7 +49,7 @@ my_id = my_sp.me()["id"]
 
 # filter for songs
 PARTY_FILTER = {
-    "min_danceability": 0.8, 
+    "min_danceability": 0.7, 
     "min_energy": 0.6,
     "max_liveness": 0.3, 
     "max_duration_ms": 240000, 
@@ -401,6 +401,43 @@ def addPlaylistToSpotify(request: HttpRequest, playlist_id: int):
     playlist.spotify_id = created_playlist["id"]
     playlist.save()
     return redirect('home')
+
+def addPlaylist(request: HttpRequest):
+    currentParty = Party.objects.filter(active=True).first()
+    if not currentParty:
+        return render(request, 'home/noParty.html')
+    
+    if request.method == 'POST':
+        url_or_id = request.POST['url_or_id']
+        try:
+            playlist = my_sp.playlist(url_or_id)
+            for item in playlist['tracks']['items']:
+                # Check if song is already in database
+                if Song.objects.filter(spotify_id=item['track']['id']).exists():
+                    song = Song.objects.get(spotify_id=item['track']['id'])
+                    currentParty.songs_from_users.add(song)
+                    continue
+                song = Song()
+                song.title = item['track']['name']
+                song.spotify_id = item['track']['id']
+                song.popularity = item['track']['popularity']
+                song.duration_ms = item['track']['duration_ms']
+                song.cover = item['track']['album']['images'][0]['url']
+                song.save()
+                for artist in item['track']['artists']:
+                    if not Artist.objects.filter(spotify_id=artist['id']).exists():
+                        a = Artist()
+                        a.name = artist['name']
+                        a.spotify_id = artist['id']
+                        a.save()
+                    song.artists.add(Artist.objects.get(spotify_id=artist['id']))
+                song.save()
+                currentParty.songs_from_users.add(song)
+        except Exception as e:
+            print(f"Error with {url_or_id}: {e}")
+            pass
+        return redirect('processSongs')
+    return render(request, 'home/addPlaylist.html')
 
 def pages(request: HttpRequest):
     context = {}
