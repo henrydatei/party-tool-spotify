@@ -185,7 +185,7 @@
                                     <div class="col-xl-12">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5>{{ playlist.name }} {% if not playlist.spotify_id %}<a href="addPlaylistToSpotify/{{playlist.id}}" class="label theme-bg2 text-white f-12">Add to Spotify</a>{% endif %}</h5>
+                                                <h5>{{ playlist.name }} {% if not playlist.spotify_id %}<a href="addPlaylistToSpotify/{{playlist.id}}" class="label theme-bg2 text-white f-12">Add to <img src="{{ ASSETS_ROOT }}/images/Spotify_Logo_RGB_White.png" width="70px"></a>{% endif %}</h5>
                                             </div>
                                             <div class="card-block table-border-style">
                                                 <div class="table-responsive">
@@ -204,12 +204,20 @@
                                                         <tbody>
                                                             {% for song in playlist.songs.all %}
                                                                 <tr>
-                                                                    <th scope="row"><img src="{{ song.cover }}" height="30" width="30"></img></th>
+                                                                    <th scope="row">
+                                                                        <a href="https://open.spotify.com/track/{{song.spotify_id}}" target="_bank">
+                                                                            <img src="{{ song.cover }}" height="30" width="30"></img>
+                                                                        </a>
+                                                                    </th>
                                                                     <td>
-                                                                        {{ song.title }} by 
-                                                                        {% for artist in song.artists.all %}
-                                                                            {{ artist.name }}{% if not forloop.last %}, {% endif %}
-                                                                        {% endfor %}
+                                                                        <a href="https://open.spotify.com/track/{{song.spotify_id}}" target="_bank">
+                                                                            <span class="text-muted">
+                                                                                {{ song.title }} by 
+                                                                                {% for artist in song.artists.all %}
+                                                                                    {{ artist.name }}{% if not forloop.last %}, {% endif %}
+                                                                                {% endfor %}
+                                                                            </span>
+                                                                        </a>
                                                                     </td>
                                                                     <td>{{ song.duration_ms|milliseconds_to_mmss }}</td>
                                                                     <td>{{ song.danceability|multiply:100|floatformat }}%</td>
