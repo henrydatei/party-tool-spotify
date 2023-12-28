@@ -397,7 +397,10 @@ def addToBlacklist(request: HttpRequest):
 def addPlaylistToSpotify(request: HttpRequest, playlist_id: int):
     playlist = Playlist.objects.get(id=playlist_id)
     created_playlist = my_sp.user_playlist_create(my_id, playlist.name, public=True, collaborative=False, description=playlist.description)
-    my_sp.user_playlist_add_tracks(my_id, created_playlist["id"], [song.spotify_id for song in playlist.songs.all()])
+    # add Songs in batches of 100
+    for i in range(0, playlist.songs.count(), 100):
+        batch = playlist.songs.all()[i:i+100]
+        my_sp.user_playlist_add_tracks(my_id, created_playlist["id"], [song.spotify_id for song in batch])
     playlist.spotify_id = created_playlist["id"]
     playlist.save()
     return redirect('home')
