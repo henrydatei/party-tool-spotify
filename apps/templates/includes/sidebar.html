@@ -15,45 +15,66 @@
                 <li class="nav-item pcoded-menu-caption">
                     <label>Current Party</label>
                 </li>
-                <li data-username="dashboard" 
-                    class="nav-item">
-                    <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
-                            class="pcoded-mtext">Dashboard</span></a>
+                <li data-username="home" class="nav-item">
+                    <a href="/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-home"></i>
+                        </span>
+                        <span class="pcoded-mtext">Dashboard</span>
+                    </a>
                 </li>
-                <li data-username="Profile Page" 
-                    class="nav-item">
-                    <a href="/joinParty/" class="nav-link">
-                        <span class="pcoded-micon"><i class="feather icon-user-plus"></i></span>
-                            <span class="pcoded-mtext">Join Party</span></a>
+                {% if not user_joined_party %}
+                <li data-username="joinParty" class="nav-item">
+                    <a href="/joinParty/{{party.id}}/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-user-plus"></i>
+                        </span>
+                        <span class="pcoded-mtext">Join Party</span>
+                    </a>
                 </li>
-                <li data-username="dashboard" 
-                    class="nav-item">
-                    <a href="/addPlaylist/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-upload-cloud"></i></span><span
-                            class="pcoded-mtext">Add Playlist</span></a>
+                {% endif %}
+                <li data-username="addPlaylist" class="nav-item">
+                    <a href="/party/{{party.id}}/addPlaylist/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-upload-cloud"></i>
+                        </span>
+                        <span class="pcoded-mtext">Add Playlist</span>
+                    </a>
                 </li>
-                <li data-username="Profile Page" 
-                    class="nav-item">
-                    <a href="/newPlaylist/" class="nav-link">
-                        <span class="pcoded-micon"><i class="feather icon-play"></i></span>
-                            <span class="pcoded-mtext">Create new Playlist</span></a>
+                <li data-username="newPlaylist" class="nav-item">
+                    <a href="/party/{{party.id}}/newPlaylist/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-play"></i>
+                        </span>
+                        <span class="pcoded-mtext">Create new Playlist</span>
+                    </a>
                 </li>
                 <li class="nav-item pcoded-menu-caption">
                     <label>Party Management</label>
                 </li>
-                <li data-username="dashboard" 
-                    class="nav-item">
-                    <a href="/newParty/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-plus"></i></span><span
-                            class="pcoded-mtext">Create new Party</span></a>
+                <li data-username="newParty" class="nav-item">
+                    <a href="/newParty/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-plus"></i>
+                        </span>
+                        <span class="pcoded-mtext">Create new Party</span>
+                    </a>
                 </li>
-                <li data-username="dashboard" 
-                    class="nav-item">
-                    <a href="/processSongs/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-music"></i></span><span
-                            class="pcoded-mtext">Process Songs</span></a>
+                <li data-username="processSongs" class="nav-item">
+                    <a href="/processSongs/" class="nav-link">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-music"></i>
+                        </span>
+                        <span class="pcoded-mtext">Process Songs</span>
+                    </a>
                 </li>
-                <li data-username="dashboard" 
-                    class="nav-item">
-                    <a href="/addToBlacklist/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-slash"></i></span><span
-                            class="pcoded-mtext">Add to Blacklist</span></a>
+                <li data-username="addToBlacklist" class="nav-item">
+                    <a href="/addToBlacklist/" class="nav-link ">
+                        <span class="pcoded-micon">
+                            <i class="feather icon-slash"></i>
+                        </span>
+                        <span class="pcoded-mtext">Add to Blacklist</span>
+                    </a>
                 </li>
                 {% comment %}               
                 <li class="nav-item pcoded-menu-caption">

@@ -10,14 +10,16 @@ urlpatterns = [
 
     # The home page
     path('', views.index, name='home'),
-    path('joinParty/', views.joinParty, name='joinParty'),
-    path('callback', views.callback, name='callback'),
+    path('joinParty/<int:party_id>', views.joinParty, name='joinParty'),
     path('newParty/', views.newParty, name='newParty'),
-    path('newPlaylist/', views.newPlaylist, name='newPlaylist'),
+    path('party/<int:party_id>/newPlaylist/', views.newPlaylist, name='newPlaylist'),
     path('processSongs/', views.processSongs, name='processSongs'),
     path('addToBlacklist/', views.addToBlacklist, name='addToBlacklist'),
-    path('addPlaylistToSpotify/<int:playlist_id>', views.addPlaylistToSpotify, name='addPlaylistToSpotify'),
-    path('addPlaylist/', views.addPlaylist, name='addPlaylist'),
+    path('addPlaylistToSpotify/<int:playlist_id>/', views.addPlaylistToSpotify, name='addPlaylistToSpotify'),
+    path('party/<int:party_id>/addPlaylist/', views.addPlaylist, name='addPlaylist'),
+    path('authenticate/', views.authenticate, name='authenticate'),
+    path('switchParty/', views.switchParty, name='switchParty'),
+    path('party/<int:party_id>/', views.party, name='party'),
 
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),

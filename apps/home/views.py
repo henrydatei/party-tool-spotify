@@ -7,17 +7,14 @@ from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpRequest, HttpResponseServerError
 from django.template import loader
 from django.urls import reverse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 import random
 import numpy as np
 from datetime import datetime
 from decouple import config
 import pandas as pd
-import uuid
-from urllib.parse import urlparse, parse_qs
 
 from .models import Party, Song, Blacklist, Playlist, User, Artist
 
@@ -25,27 +22,6 @@ from .models import Party, Song, Blacklist, Playlist, User, Artist
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI')
-
-# login to spotify via CLI
-sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=".cache")
-token_info = sp_oauth.get_cached_token()
-if not token_info:
-    auth_url = sp_oauth.get_authorize_url()
-    print(f"Please open the following link in a browser and authorise the application: \n{auth_url}")
-    redirected_url = input("Please enter the entire redirect URL here: ")
-
-    # Extract the `code` parameter from the URL
-    parsed_url = urlparse(redirected_url)
-    parsed_params = parse_qs(parsed_url.query)
-    code = parsed_params.get("code", [None])[0]
-    if not code:
-        print("No valid code was extracted from the URL provided.")
-        exit()
-
-    token_info = sp_oauth.get_access_token(code)
-    
-my_sp = spotipy.Spotify(auth=token_info['access_token'])
-my_id = my_sp.me()["id"]
 
 # filter for songs
 PARTY_FILTER = {
@@ -68,9 +44,6 @@ CLUB_FILTER = {
     "min_popularity": 20
 }
 
-def get_user_cache_path(username):
-    return f".cache-{username}"
-
 
 def convert_dict_filter_to_orm_filter(dict_filter: dict):
     filter_conditions = {}
@@ -85,10 +58,81 @@ def convert_dict_filter_to_orm_filter(dict_filter: dict):
         
     return filter_conditions
 
+def get_spotify_from_session(request: HttpRequest):
+    spotify_token = request.session.get('spotify_token')
+    if not spotify_token:
+        return HttpResponseServerError("Spotify Token not found in session.")
+    
+    sp = spotipy.Spotify(auth=spotify_token)
+    return sp
+
+# url to this view is /
 def index(request: HttpRequest):
-    currentParty = Party.objects.filter(active=True).first()
-    if not currentParty:
-        return render(request, 'home/noParty.html')
+
+    # If request.code exists, then we are set and we can authenticate the user
+    if request.code:
+        cache_handler = spotipy.DjangoSessionCacheHandler(request)
+        auth_manager = spotipy.oauth2.SpotifyOAuth(
+            client_id=SPOTIFY_CLIENT_ID,
+            client_secret=SPOTIFY_CLIENT_SECRET,
+            redirect_uri=SPOTIFY_REDIRECT_URI,
+            scope="user-library-read",
+            cache_handler=cache_handler,
+            show_dialog=True,
+        )
+        token_info = auth_manager.get_access_token(request.code)
+        request.session['spotify_token'] = token_info['access_token']
+        return redirect("switchParty")
+
+    # Else, redirect them to authenticate
+    return redirect("authenticate")
+
+# url to this view is authenticate/
+def authenticate(request: HttpRequest):
+    context = {}
+    cache_handler = spotipy.DjangoSessionCacheHandler(request)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(
+        client_id=SPOTIFY_CLIENT_ID,
+        client_secret=SPOTIFY_CLIENT_SECRET,
+        redirect_uri=SPOTIFY_REDIRECT_URI,
+        cache_handler=cache_handler
+    )
+    if auth_manager.validate_token(cache_handler.get_cached_token()):
+        # create new user
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        user = User()
+        user.spotify_id = sp.me()['id']
+        user.name = sp.me()['display_name']
+        user.save()
+        # If token already exists and is valid, redirect them to the home page
+        token_info = auth_manager.get_access_token(request.code)
+        request.session['spotify_token'] = token_info['access_token']
+        return redirect("switchParty")
+
+    # Make sure your client_id/client_secret/redirect_uri environment variables are set
+    auth_manager = spotipy.oauth2.SpotifyOAuth(
+        client_id=SPOTIFY_CLIENT_ID,
+        client_secret=SPOTIFY_CLIENT_SECRET,
+        redirect_uri=SPOTIFY_REDIRECT_URI,
+        scope="user-library-read",
+        cache_handler=cache_handler,
+        show_dialog=True,
+    )
+
+    # In authenticate page there is a link button with href set to context["auth_url"]
+    context["auth_url"] = auth_manager.get_authorize_url()
+
+    return render(request, "home/authenticate.html", context)
+
+def switchParty(request: HttpRequest):
+    context = {
+        # get only the newest 5 partys
+        'partys': Party.objects.all().order_by('-date')[:5]
+    }
+    return render(request, 'home/switchParty.html', context)
+
+def party(request: HttpRequest, party_id: int):
+    currentParty = get_object_or_404(Party, id=party_id)
     if not currentParty.users.all():
         return render(request, 'home/noUsers.html')
     if not currentParty.playlists.all():
@@ -97,6 +141,10 @@ def index(request: HttpRequest):
     allSongsinPlaylists = []
     for playlist in currentParty.playlists.all():
         allSongsinPlaylists += playlist.songs.all()
+        
+    sp = get_spotify_from_session(request)
+
+    currentUser = User.objects.filter(spotify_id=sp.me()['id']).first()
     
     context = {
         'party': currentParty,
@@ -112,47 +160,22 @@ def index(request: HttpRequest):
         'popularity': np.mean([song.popularity for song in allSongsinPlaylists]),
         'playlists': currentParty.playlists.all(),
         'filtered_by_blacklist': sum([playlist.songs_filtered_by_blacklist.count() for playlist in currentParty.playlists.all()]),
+        'user': currentUser,
+        'user_joined_party': currentUser in currentParty.users.all(),
     }
 
-    html_template = loader.get_template('home/index.html')
-    return HttpResponse(html_template.render(context, request))
+    return render(request, 'home/party.html', context)
 
-def joinParty(request: HttpRequest):
-    party = Party.objects.filter(active=True).first()
-    if not party:
-        return render(request, 'home/noParty.html')
-    else:
-        unique_identifier = str(uuid.uuid4())
-        request.session['user_unique_id'] = unique_identifier
-        cache_path = get_user_cache_path(unique_identifier)
-        user_sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=cache_path)
-        auth_url = user_sp_oauth.get_authorize_url()
-        return redirect(auth_url)
-
-def callback(request: HttpRequest):
-    unique_identifier = request.session.get('user_unique_id')
-    if not unique_identifier:
-        # return HttpResponseServerError("No unique identifier found in session.")
-        cache_path = None
-    else:
-        cache_path = get_user_cache_path(unique_identifier)
-        
-    user_sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope="user-library-read,playlist-modify-public", cache_path=cache_path)
-    token_info = user_sp_oauth.get_access_token(request.GET.get('code'))
-    sp = spotipy.Spotify(auth=token_info['access_token'])
+def joinParty(request: HttpRequest, party_id: int):
+    currentParty = get_object_or_404(Party, id=party_id)
     
-    # Create a new User
-    user = User()
-    user.spotify_id = sp.me()['id']
-    user.access_token = token_info['access_token']
-    user.name = sp.me()['display_name']
-    user.save()
+    sp = get_spotify_from_session(request)
     
-    # Add User to Party
-    party = Party.objects.filter(active=True).first()
-    party.users.add(user)
-
-    # Process Songs
+    # Add user to party
+    currentUser = User.objects.filter(spotify_id=sp.me()['id']).first()
+    currentParty.users.add(currentUser)
+    
+    # Add songs from user to party and database
     number_of_liked_songs = sp.current_user_saved_tracks(limit=1)['total']
     i = 0
     while i < number_of_liked_songs:
@@ -161,7 +184,7 @@ def callback(request: HttpRequest):
             # Check if song is already in database
             if Song.objects.filter(spotify_id=item['track']['id']).exists():
                 song = Song.objects.get(spotify_id=item['track']['id'])
-                party.songs_from_users.add(song)
+                currentParty.songs_from_users.add(song)
                 continue
             song = Song()
             song.title = item['track']['name']
@@ -178,33 +201,33 @@ def callback(request: HttpRequest):
                     a.save()
                 song.artists.add(Artist.objects.get(spotify_id=artist['id']))
             song.save()
-            party.songs_from_users.add(song)
+            currentParty.songs_from_users.add(song)
         i += 50
-    party.save()
-    return redirect('home')
+    currentParty.save()
+    
+    return redirect('party', party_id=party_id)
 
 def newParty(request: HttpRequest):
     if request.method == 'POST':
-        # set status of all partys to inactive
-        for party in Party.objects.all():
-            party.active = False
-            party.save()
         # create new party
         party = Party()
         party.date = request.POST['date']
         party.description = request.POST['description']
         party.save()
-        return HttpResponseRedirect(reverse('home'))
+        # go to the party
+        return redirect('party', party_id=party.id)
     return render(request, 'home/newParty.html')
 
 def processSongs(request: HttpRequest):
     not_processed_songs = Song.objects.filter(processed=False).all()
     song_ids = [song.spotify_id for song in not_processed_songs]
     
+    sp = get_spotify_from_session(request)
+    
     # Process songs in batches of 100
     for i in range(0, len(song_ids), 100):
         batch_ids = song_ids[i:i+100]
-        features_list = my_sp.audio_features(batch_ids)
+        features_list = sp.audio_features(batch_ids)
         for j, features in enumerate(features_list):
             if features:  # Check if features are available
                 song = not_processed_songs[i + j]  # Get the corresponding song from the list of not processed songs
@@ -221,16 +244,18 @@ def processSongs(request: HttpRequest):
                 song.tempo = features["tempo"]
                 song.save()
 
-    return redirect('home')
+    # return to previous page, get from referer
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-def newPlaylist(request: HttpRequest):
-    currentParty = Party.objects.filter(active=True).first()
-    if not currentParty:
-        return render(request, 'home/noParty.html')
+def newPlaylist(request: HttpRequest, party_id: int):
+    currentParty = get_object_or_404(Party, id=party_id)
+    
     if not currentParty.users.all():
         return render(request, 'home/noUsers.html')
     allSongs = currentParty.songs_from_users.all()
     processedSongs = currentParty.songs_from_users.filter(processed=True)
+    
+    sp = get_spotify_from_session(request)
     
     # The Blacklist
     blacklist_songs = Blacklist.objects.filter(type="title")
@@ -272,7 +297,7 @@ def newPlaylist(request: HttpRequest):
             else:
                 seed_songs = random.sample(list(clubSongs), batchSize)
                 filter = CLUB_FILTER
-            results = my_sp.recommendations(seed_tracks=[song.spotify_id for song in seed_songs], limit=recommendatonSize, **filter)
+            results = sp.recommendations(seed_tracks=[song.spotify_id for song in seed_songs], limit=recommendatonSize, **filter)
             for item in results['tracks']:
                 # Check if song is already in database
                 if Song.objects.filter(spotify_id=item['id']).exists():
@@ -326,12 +351,13 @@ def newPlaylist(request: HttpRequest):
 
 def addToBlacklist(request: HttpRequest):
     if request.method == 'POST':
+        sp = get_spotify_from_session(request)
         # Check which preset is selected
         if request.POST['preset'] == "deutschrap":
             single_artists = pd.read_html("https://de.wikipedia.org/wiki/Liste_von_Hip-Hop-Musikern_Deutschlands")[0].iloc[:,1].tolist()
             groups = pd.read_html("https://de.wikipedia.org/wiki/Liste_von_Hip-Hop-Musikern_Deutschlands")[1].iloc[:,1].tolist()
             for rapper in list(set(single_artists + groups)):
-                result = my_sp.search(q='artist:' + rapper, type='artist')
+                result = sp.search(q='artist:' + rapper, type='artist')
                 try:
                     artist_id = result['artists']['items'][0]['id']
                     artist_name = result['artists']['items'][0]['name']
@@ -346,7 +372,7 @@ def addToBlacklist(request: HttpRequest):
             type = request.POST["type"]
             if type == "artist":
                 try:
-                    result = my_sp.artist(url_or_id)
+                    result = sp.artist(url_or_id)
                     artist_id = result['id']
                     if not Blacklist.objects.filter(spotify_id=artist_id, type="artist").exists():
                         Blacklist.objects.create(spotify_id=artist_id, type="artist", name=result['name'])
@@ -355,7 +381,7 @@ def addToBlacklist(request: HttpRequest):
                     pass
             elif type == "title":
                 try:
-                    result = my_sp.track(url_or_id)
+                    result = sp.track(url_or_id)
                     track_id = result['id']
                     if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
                         Blacklist.objects.create(spotify_id=track_id, type="title", name=result['name'])
@@ -364,7 +390,7 @@ def addToBlacklist(request: HttpRequest):
                     pass 
             elif type == "playlist_artist":
                 try:
-                    result = my_sp.playlist(url_or_id)
+                    result = sp.playlist(url_or_id)
                     for item in result['tracks']['items']:
                         for artist in item['track']['artists']:
                             artist_id = artist['id']
@@ -375,7 +401,7 @@ def addToBlacklist(request: HttpRequest):
                     pass
             elif type == "playlist_title":
                 try:
-                    result = my_sp.playlist(url_or_id)
+                    result = sp.playlist(url_or_id)
                     for item in result['tracks']['items']:
                         track_id = item['track']['id']
                         if not Blacklist.objects.filter(spotify_id=track_id, type="title").exists():
@@ -395,25 +421,29 @@ def addToBlacklist(request: HttpRequest):
     return render(request, 'home/addToBlacklist.html', context)
 
 def addPlaylistToSpotify(request: HttpRequest, playlist_id: int):
+    sp = get_spotify_from_session(request)
+    
     playlist = Playlist.objects.get(id=playlist_id)
-    created_playlist = my_sp.user_playlist_create(my_id, playlist.name, public=True, collaborative=False, description=playlist.description)
+    created_playlist = sp.user_playlist_create(sp.me()['id'], playlist.name, public=True, collaborative=False, description=playlist.description)
     # add Songs in batches of 100
     for i in range(0, playlist.songs.count(), 100):
         batch = playlist.songs.all()[i:i+100]
-        my_sp.user_playlist_add_tracks(my_id, created_playlist["id"], [song.spotify_id for song in batch])
+        sp.user_playlist_add_tracks(sp.me()['id'], created_playlist["id"], [song.spotify_id for song in batch])
     playlist.spotify_id = created_playlist["id"]
     playlist.save()
-    return redirect('home')
+    
+    # return to previous page, get from referer
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-def addPlaylist(request: HttpRequest):
-    currentParty = Party.objects.filter(active=True).first()
-    if not currentParty:
-        return render(request, 'home/noParty.html')
+def addPlaylist(request: HttpRequest, party_id: int):
+    currentParty = get_object_or_404(Party, id=party_id)
+    
+    sp = get_spotify_from_session(request)
     
     if request.method == 'POST':
         url_or_id = request.POST['url_or_id']
         try:
-            playlist = my_sp.playlist(url_or_id)
+            playlist = sp.playlist(url_or_id)
             for item in playlist['tracks']['items']:
                 # Check if song is already in database
                 if Song.objects.filter(spotify_id=item['track']['id']).exists():
